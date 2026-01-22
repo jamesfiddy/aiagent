@@ -23,11 +23,12 @@ def main():
     if args.verbose == True:
         print(f"User prompt: {args.user_prompt}")
 
-    get_response(client, messages, args.verbose)  
+    generate_content(client, messages, args.verbose)  
     
-def get_response(client, messages, verbose):
-
-    response = client.models.generate_content(model='gemini-2.5-flash', contents=messages)
+def generate_content(client, messages, verbose):
+    response = client.models.generate_content(
+        model='gemini-2.5-flash', 
+        contents=messages)
 
     prompt_tokens = 0
     response_tokens = 0
@@ -39,9 +40,10 @@ def get_response(client, messages, verbose):
         raise RuntimeError("Metadata is empty, likely API failure.")
     
     if verbose == True:
-        print(f"Prompt tokens: {prompt_tokens}")
-        print(f"Response tokens: {response_tokens}")
+        print("Prompt tokens:", prompt_tokens)
+        print("Response tokens:", response_tokens)
     
+    print("Response:")
     print(response.text)
 
 if __name__ == "__main__":
