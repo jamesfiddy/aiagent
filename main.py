@@ -3,6 +3,7 @@ import argparse
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+import prompts
 
 def main():
     load_dotenv()
@@ -26,9 +27,11 @@ def main():
     generate_content(client, messages, args.verbose)  
     
 def generate_content(client, messages, verbose):
+    system_prompt = prompts.system_prompt
     response = client.models.generate_content(
         model='gemini-2.5-flash', 
-        contents=messages)
+        contents=messages,
+        config=types.GenerateContentConfig(system_instruction=system_prompt))
 
     prompt_tokens = 0
     response_tokens = 0
