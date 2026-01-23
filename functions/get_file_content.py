@@ -1,5 +1,5 @@
 import os
-
+from google import genai
 from config import MAX_CHARS
 
 def get_file_content(working_directory, file_path):
@@ -27,3 +27,18 @@ def get_file_content(working_directory, file_path):
     
     except Exception as e:
         return f'Error reading file: {e}'
+    
+schema_get_content_info = genai.types.FunctionDeclaration(
+    name="get_file_content",
+    description="Gets the contents of the specified file, limited to a certain number of characters",
+    parameters=genai.types.Schema(
+        type=genai.types.Type.OBJECT,
+        properties={
+            "file_path": genai.types.Schema(
+                type=genai.types.Type.STRING,
+                description="The path to the file you want to get the contents of",
+            ),
+        },
+        required=["file_path"]
+    ),
+)

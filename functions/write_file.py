@@ -1,4 +1,5 @@
 import os
+from google import genai
 
 def write_file(working_directory, file_path, content):
     try:
@@ -24,3 +25,22 @@ def write_file(working_directory, file_path, content):
     
     except Exception as e:
         return f'Error: standard library function call: {e}'
+    
+schema_write_file_info = genai.types.FunctionDeclaration(
+    name="write_file",
+    description="Writes to the file specified",
+    parameters=genai.types.Schema(
+        type=genai.types.Type.OBJECT,
+        properties={
+            "file_path": genai.types.Schema(
+                type=genai.types.Type.STRING,
+                description="The path to the Python file you want to run",
+            ),
+            "content": genai.types.Schema(
+                type=genai.types.Type.STRING,
+                description="What you want to write to the file",
+            )
+        },
+        required=["file_path", "content"]
+    ),
+)
