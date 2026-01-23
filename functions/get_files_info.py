@@ -1,4 +1,5 @@
 import os
+from google import genai
 
 def get_files_info(working_directory, directory="."):
     try:
@@ -25,3 +26,17 @@ def get_files_info(working_directory, directory="."):
 
     except Exception as e:
         return f'Error: standard library function call: {e}'
+
+schema_get_files_info = genai.types.FunctionDeclaration(
+    name="get_files_info",
+    description="Lists files in a specified directory relative to the working directory, providing file size and directory status",
+    parameters=genai.types.Schema(
+        type=genai.types.Type.OBJECT,
+        properties={
+            "directory": genai.types.Schema(
+                type=genai.types.Type.STRING,
+                description="Directory path to list files from, relative to the working directory (default is the working directory itself)",
+            ),
+        },
+    ),
+)
