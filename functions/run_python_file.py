@@ -29,17 +29,16 @@ def run_python_file(working_directory, file_path, args=None):
 
         program_execution = subprocess.run(command, capture_output=True, text=True, timeout=30)
 
-        output_string = ""
-        if(program_execution.returncode != 0):
-            output_string += f'Process exited with code {program_execution.returncode}'
-
-        if not program_execution.stdout or program_execution.stderr:
-            output_string += "No output produced"
-        
-        else:
-            output_string += f'STDOUT: {program_execution.stdout}, STDERR: {program_execution.stderr}'
-
-        return output_string
+        output = []
+        if program_execution.returncode != 0:
+            output.append(f"Process exited with code {program_execution.returncode}")
+        if not program_execution.stdout and not program_execution.stderr:
+            output.append("No output produced")
+        if program_execution.stdout:
+            output.append(f"STDOUT:\n{program_execution.stdout}")
+        if program_execution.stderr:
+            output.append(f"STDERR:\n{program_execution.stderr}")
+        return "\n".join(output)
         
     except Exception as e:
         return f"Error: executing Python file: {e}"
