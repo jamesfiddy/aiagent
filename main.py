@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 from dotenv import load_dotenv
 from google import genai
@@ -20,12 +21,21 @@ def main():
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     args = parser.parse_args()
 
-    messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
+    messages = [types.Content(role="user", 
+                              parts=[types.Part(text=args.user_prompt)])]
 
     if args.verbose == True:
         print(f"User prompt: {args.user_prompt}")
 
-    generate_content(client, messages, args.verbose)  
+    for _ in range(20):
+        final_text = generate_content(client, messages, args.verbose)
+        if final_text is not None:
+            print("Final response:")
+            print(final_text)
+            return
+
+    print("Maximum iterations reached")
+    sys.exit(1)
     
 def generate_content(client, messages, verbose):
     available_functions = call_function.available_functions
@@ -47,23 +57,29 @@ def generate_content(client, messages, verbose):
     if verbose == True:
         print("Prompt tokens:", prompt_tokens)
         print("Response tokens:", response_tokens)
+
+    for candidate in response.candidates:
+        messages.append(candidate.content)
+
+    if not response.function_calls:
+        return response.text
       
-    if response.function_calls is not None:
-        function_results = []
-        for call in response.function_calls:
-            function_call_result = call_function(call, verbose=verbose)
-            if not function_call_result.parts:
-                raise Exception("parts not empty")
-            if function_call_result.parts[0].function_response is None:
-                raise Exception("function response is None")
-            if function_call_result.parts[0].function_response.response is None:
-                raise Exception("function response response is None")
-            function_results.append(function_call_result.parts[0])
-            if verbose == True:
-                print(f"-> {function_call_result.parts[0].function_response.response}")
-    else:
-        print("Response:")
-        print(response.text)
+    function_results = []
+    for call in response.function_calls:
+        function_call_result = call_function(call, verbose=verbose)
+        if not function_call_result.parts:
+            raise Exception("parts not empty")
+        if function_call_result.parts[0].function_response is None:
+            raise Exception("function response is None")
+        if function_call_result.parts[0].function_response.response is None:
+            raise Exception("function response response is None")
+        function_results.append(function_call_result.parts[0])
+        if verbose == True:
+            print(f"-> {function_call_result.parts[0].function_response.response}")
+   
+    messages.append(types.Content(role="user", parts=function_results))
+
+    return None
 
 if __name__ == "__main__":
     main()
